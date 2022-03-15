@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Login con Google</h1>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <div id="g_id_onload" data-client_id="344249433714-ggmlhfbiu5necvnopm78jnue1nc8l0fe.apps.googleusercontent.com" data-auto_prompt="false" data-callback="handleCredentialResponse"></div>
+    <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
+    <button id="deslogearse-google">Deslogearse de Google</button>
+    <input type="email" name="correo" id="correo" placeholder="correo">
+    <input type="password" name="password" id="password" placeholder="password">
+    <input type="button" value="Login" id="btnLogin" onclick="login()">
+    <script>
+      let boton = document.getElementById("deslogearse-google");
+      boton.onclick = () => {
+        google.accounts.id.disableAutoSelect();
+        google.accounts.id.revoke(localStorage.getItem("email"));
+        localStorage.clear();
+        location.reload();
+      }
+
+      function handleCredentialResponse(response) {
+        const body = {
+          id_token: response.credential
+        };
+        fetch('/google', {
+          method: 'POST',
+          body: JSON.stringify(body),
+          headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+          },
+        }).then((response) => response.json()).then((json) => {
+          localStorage.setItem("email", json.token);
+        });
+      }
+
+      function login() {
+        fetch('/login', {
+          method: 'POST',
+          body: JSON.stringify({
+            correo: document.getElementById("correo").value,
+            password: document.getElementById("password").value
+          }),
+          headers: {
+            'Content-type': 'application/json; charset=UTF-8',
+          },
+        }).then((response) => response.json()).then((json) => {
+          alert(json.msg)
+          localStorage.setItem("token", json.token);
+          window.location.href = "/productos.html";
+        })
+      }
+    </script>
+  </body>
+</html>
